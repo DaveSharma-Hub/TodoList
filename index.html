@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>List</title>
+</head>
+<style>
+    h3{
+        text-align: center;
+        font-size: 2rem;
+        font-family: 'Courier New', Courier, monospace;
+    }
+    #presentList{
+        width:90%;
+        text-align: center;
+        margin:0 auto;
+    }
+    #outerDiv{
+        width: 90%;
+        margin: 0 auto;
+        display: flex; 
+        flex-direction: column;
+    }
+
+    #outerDiv > form{
+        margin: 0 auto;
+        width:100%;
+    }
+
+    #outerDiv > form #inputText{
+        padding:10px 10px;
+        width:20%;
+    }
+    #outerDiv > form #description{
+        padding:10px 10px;
+        width:50%;
+    }
+    #outerDiv > form #timeText{
+        padding:9px 9px;
+        /* width:50%; */
+    }
+
+
+    #outerDiv > form button{
+        padding:10px 10px;
+        background-color: aqua;
+        border: none;
+        border-radius: 3px;
+        cursor: pointer;
+    }
+
+    .innerListValues{
+        background-color: rgba(255, 0, 0, 0.2);
+        margin-top: 10px;
+        font-size: 2rem;
+        font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+        cursor:pointer;
+    }
+
+    #notesTextArea{
+        /* display:none; */
+        width:50%;
+        margin:2% auto;
+        display: flex;
+        visibility:hidden;
+    }
+
+    #notesTextArea textarea{
+        width:100%;
+    }
+    
+    .modal {
+  display: none; /* Hidden by default */
+  position: fixed; /* Stay in place */
+  z-index: 1; /* Sit on top */
+  padding-top: 100px; /* Location of the box */
+  left: 0;
+  top: 0;
+  width: 100%; /* Full width */
+  height: 100%; /* Full height */
+  overflow: auto; /* Enable scroll if needed */
+  background-color: rgb(0,0,0); /* Fallback color */
+  background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+}
+
+/* Modal Content */
+.modal-content {
+  background-color: #fefefe;
+  margin: auto;
+  padding: 20px;
+  border: 1px solid #888;
+  width: 80%;
+}
+
+/* The Close Button */
+.close {
+  color: #aaaaaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+  color: #000;
+  text-decoration: none;
+  cursor: pointer;
+}
+</style>
+<body>
+    <h3>Todays Todo List</h3>
+    <div id="outerDiv">
+        <form onsubmit="event.preventDefault(); addToList();">
+            <input id="inputText" type="text" placeholder="Title" required>
+            <input id="description" type="text" placeholder="Description" required>
+            <input id="timeText" type="time">
+            <button type="submit"">Add Item</button>
+        </form>
+    </div>
+    <div id="notesTextArea">
+        <h4>Add Note</h4>
+        <textarea rows="2" cols="50" id="addedNotes"></textarea>
+    </div>
+    <div id="presentList">
+    </div>
+
+    <!-- <div id="myModal" class="modal">
+
+        <!-- Modal content 
+        <div class="modal-content">
+          <span class="close">&times;</span>
+          <p>Some text in the Modal..</p>
+        </div>
+      
+      </div> -->
+</body>
+<script>
+
+let counter=0;
+    function addToList(){
+        const text = document.getElementById('inputText').value;
+        const time = document.getElementById('timeText').value;
+        const desc = document.getElementById('description').value;
+
+        document.getElementById('timeText').value="";
+        document.getElementById('inputText').value = "";
+        document.getElementById('description').value="";
+
+        var list = document.getElementById('presentList');
+        const div = document.createElement('div');
+        const li = document.createElement('li');
+        const button = document.createElement('button');
+        button.setAttribute('id','addNotes');
+        button.textContent='Add Notes';
+        button.style.float="right";
+        button.setAttribute('onclick',`addNote(${counter})`);
+        button.style.padding="10px 10px";
+        button.style.backgroundColor="aqua";
+        button.style.borderRadius="3px";
+        button.style.cursor="pointer";
+
+        const button2 = document.createElement('button');
+        button2.setAttribute('id','addNotes');
+        button2.textContent='Edit Notes';
+        button2.style.float="right";
+        button2.setAttribute('onclick',`editNote(${counter})`);
+        button2.style.padding="10px 10px";
+        button2.style.backgroundColor="aqua";
+        button2.style.borderRadius="3px";
+        button2.style.cursor="pointer";
+
+        li.appendChild(document.createTextNode(desc));
+        li.setAttribute('id',`li${counter}`)
+        div.setAttribute('class','innerListValues');
+        div.setAttribute('id',`${counter}`);
+        div.setAttribute('onclick',`changeStatus(${counter})`);
+
+
+        div.appendChild(button);
+        div.appendChild(button2);
+
+        counter = counter+1;
+        const p = document.createTextNode(text);
+        const pt = document.createTextNode(`   Time:${time}`);
+        div.appendChild(p);
+        div.appendChild(pt);
+        div.appendChild(li);
+        var outerDiv = document.getElementById('presentList');
+        outerDiv.appendChild(div);
+    }
+    var currentlyUsed=false;
+
+    function editNote(id){
+        const textArea = document.getElementById('notesTextArea');
+        if(!currentlyUsed){
+            currentlyUsed=true;
+           
+                textArea.style.visibility="visible";
+                const button = document.createElement('button');
+                button.setAttribute('onclick',`editPresent(${id})`);
+                button.setAttribute('id',`text${id}`);
+                button.textContent='Submit';
+                const button2 = document.createElement('button');
+                button2.setAttribute('onclick',`closeArea(${id})`);
+                button2.setAttribute('id',`close${id}`);
+                button2.textContent='Close';
+                textArea.appendChild(button);
+                textArea.appendChild(button2);
+                
+                var tmpText="";
+                
+                for(var i=0;i<counter;i=i+1){
+                    const li = document.getElementById(`li${i}`);
+                    tmpText = tmpText + li.innerHTML;
+                    tmpText = tmpText + "\n";
+                }
+                document.getElementById('addedNotes').value = tmpText;
+
+                console.log(textArea.value);
+        }
+    }
+
+    function editPresent(id){
+        for(var i=0;i<counter;i=i+1){
+            const li = document.getElementById(`li${i}`);
+            li.remove();
+        }
+
+        const note = document.getElementById('addedNotes').value;
+        document.getElementById('addedNotes').value="";
+        const addNotes = document.createElement('li');
+        addNotes.appendChild(document.createTextNode(note));
+        const div = document.getElementById(id);
+        div.appendChild(addNotes);
+        const textArea = document.getElementById('notesTextArea');
+        textArea.style.visibility="hidden";
+
+        const button = document.getElementById(`text${id}`);
+        const parent = document.getElementById('notesTextArea');
+        const button2 = document.getElementById(`close${id}`);
+        parent.removeChild(button2);
+        parent.removeChild(button);
+        currentlyUsed = false;
+    }
+
+    function addNote(id){
+        const textArea = document.getElementById('notesTextArea');
+        if(!currentlyUsed){
+            currentlyUsed=true;
+            
+                textArea.style.visibility="visible";
+                const button = document.createElement('button');
+                button.setAttribute('onclick',`addToPresentToDo(${id})`);
+                button.setAttribute('id',`text${id}`);
+                button.textContent='Submit';
+                const button2 = document.createElement('button');
+                button2.setAttribute('onclick',`closeArea(${id})`);
+                button2.setAttribute('id',`close${id}`);
+                button2.textContent='Close';
+                textArea.appendChild(button);
+                textArea.appendChild(button2);
+     
+            
+        }
+    }
+    function addToPresentToDo(id){
+        const note = document.getElementById('addedNotes').value;
+        document.getElementById('addedNotes').value="";
+        const addNotes = document.createElement('li');
+        addNotes.appendChild(document.createTextNode(note));
+        const div = document.getElementById(id);
+        div.appendChild(addNotes);
+        const textArea = document.getElementById('notesTextArea');
+        textArea.style.visibility="hidden";
+
+        const button = document.getElementById(`text${id}`);
+        const parent = document.getElementById('notesTextArea');
+        const button2 = document.getElementById(`close${id}`);
+        parent.removeChild(button);
+        parent.remove(button2);
+        currentlyUsed = false;
+        console.log('test');
+    }
+
+    function closeArea(id){
+        const textArea = document.getElementById('notesTextArea');
+        textArea.style.visibility="hidden";
+        currentlyUsed=false;
+        const button = document.getElementById(`text${id}`);
+        const parent = document.getElementById('notesTextArea');
+        const button2 = document.getElementById(`close${id}`);
+        parent.removeChild(button2);
+        parent.removeChild(button);
+    }
+    // function setPriority(){
+    //     console.log('visible');
+    //     var i=0;
+    //     for(i=0;i<counter;i=i+1){
+    //         document.getElementById(i).style.visibility="visible";
+    //     }
+    // }
+
+    function changeStatus(id){
+        if(document.getElementById(id).style.backgroundColor=="rgba(255, 0, 0, 0.2)"){
+            document.getElementById(id).style.backgroundColor="rgba(0, 255, 85, 0.2)";
+        }else{
+            document.getElementById(id).style.backgroundColor="rgba(255, 0, 0, 0.2)";
+        }
+    }
+
+
+// let arrayBtn = [];
+// function setupModal(){
+//     // Get the button that opens the modal
+//     for(var i=0;i<counter;i=i+1){
+//         var btn = document.getElementById(i);
+//         // When the user clicks the button, open the modal 
+//         btn.onclick = function() {
+//             modal.style.display = "block";
+//         }
+//         arrayBtn.push(btn);
+//     }
+// }
+
+// setupModal();
+// var modal = document.getElementById("myModal");
+
+// // Get the <span> element that closes the modal
+// var span = document.getElementsByClassName("close")[0];
+
+
+// // When the user clicks on <span> (x), close the modal
+// span.onclick = function() {
+//   modal.style.display = "none";
+// }
+
+// // When the user clicks anywhere outside of the modal, close it
+// window.onclick = function(event) {
+//   if (event.target == modal) {
+//     modal.style.display = "none";
+//   }
+// }
+
+</script>
+</html>
